@@ -69,3 +69,15 @@ spec:
 
 # kubectl apply -f manifest.yaml
 # kubectl get ingress
+
+# check the app using
+
+# https://app2.raj82s.online/
+
+
+# Ingress resource
+# =================
+# Ingress Controller is used to provide external access to the applications running in kubernetes.
+#  We can set the routing rules through ingress resource either path based or host based. 
+#  in EKS ingress resource can create ALB, Listener, Rule and target group. 
+#  Ingress is attached to service, so it fetch the pods and add them to target group

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2
+  # labels of deployment resource
+  labels:
+    app: app2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+      - name: app2
+        image: dath1/app2:1.0.0
+        ports:
+        - containerPort: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: app2
+spec:
+  selector: # labels are used as selectors
+    app: app2
+  ports:
+  - protocol: TCP
+    port: 80 # service port
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app2
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:311141550186:certificate/be49f607-af2e-4791-becb-2d719d6050b9
+    alb.ingress.kubernetes.io/group.name: joindevops
+spec:
+  ingressClassName: alb
+  rules:
+  - host: "app2.raj82s.online"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: app2
+            port:
+              number: 80
+
+# Build image and push to docker hub
+
+# docker build -t dath1/app2:1.0.0 .
+# dokcer login -u dath1
+# docker push dath1/app2:1.0.0
+
+# Ingres will check if there is LoadBalancer in joindevops group and 
+# it will not create LoadBalancer again
+# it will just add the rules
+
+# kubectl apply -f manifest.yaml
+# kubectl get ingress

@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  # labels of deployment resource
+  labels:
+    app: app1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: app1
+        image: dath1/app1:1.0.0
+        ports:
+        - containerPort: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: app1
+spec:
+  selector: # labels are used as selectors
+    app: app1
+  ports:
+  - protocol: TCP
+    port: 80 # service port
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app1
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:311141550186:certificate/be49f607-af2e-4791-becb-2d719d6050b9
+    alb.ingress.kubernetes.io/group.name: joindevops
+spec:
+  ingressClassName: alb
+  rules:
+  - host: "app1.raj82s.online"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: app1
+            port:
+              number: 80
+
+# https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/
+# https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/installation/
+# https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/guide/ingress/annotations/
+
+# Install Dirvers and Set IAM policy 
+# Refer ReadMe.MD file	in 25-k8-ingress repo
+
+# To check Load balancer drivers which will create,manage and automate Load Balancers
+
+# kubectl get pods -n kube-system
+
+# Build image for app1 and push to docker hub
+
+# docker build -t dath1/app1:1.0.0 .
+# dokcer login -u dath1
+# docker push dath1/app1:1.0.0
+
+# set the annotaions in ingress to create LB
+# create certificate for the domain  *.raj82s.online and copy the certificate arn for https
+
+# kubectl apply -f manifest.yaml
+# kubectl get ingress
+
+# ADD dns record for the *.raj82s.online with LB DNS name
+
+
+
+
